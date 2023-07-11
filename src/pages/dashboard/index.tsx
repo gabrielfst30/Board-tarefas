@@ -209,7 +209,7 @@ export default function Dashboard({ user }: HomeProps) {
               </div>
             </article>
           ))}
-          ;
+      
         </section>
       </main>
     </div>
