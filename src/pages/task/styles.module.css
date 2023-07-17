@@ -53,3 +53,8 @@
     font-size: 18px;
     cursor: pointer;
 }
+
+.button:disabled{
+  cursor: not-allowed;
+  background-color: lightblue
+}
