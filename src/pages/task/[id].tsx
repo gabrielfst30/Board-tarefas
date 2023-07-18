@@ -13,8 +13,11 @@ import {
   getDoc,
   addDoc,
   getDocs,
+  deleteDoc
 } from "firebase/firestore";
+
 import { TextArea } from "@/components/TextArea";
+import { FaTrash } from 'react-icons/fa'
 
 interface TaskProps {
   item: {
@@ -66,10 +69,37 @@ export default function Task({ item, allComments }: TaskProps) {
         taskId: item?.taskId,
       });
 
+      //objeto de comentario
+      const data = {
+        id: docRef.id,
+        comment: input,
+        user: session?.user?.email,
+        name: session?.user?.name,
+        taskId: item?.taskId,
+      }
+      //adicionando o novo comentário a lista e mantendo os velhos comentários
+      setComments((oldItems) => [...oldItems, data]) 
       //depois do comentário ter enviado, o campo fica vazio.
       setInput("");
     } catch (err) {
       console.log(err);
+    }
+  }
+
+  async function handleDeleteComment(id: string){
+    try{
+      //pegando a referencia do documento
+      const docRef = doc(db, "comments", id);
+      //deletando o documento
+      await deleteDoc(docRef)
+
+      //filtro todos os comentários que foram clicados e elimino o clicado
+      const deleteComment = comments.filter((item) => item.id !== id);
+
+      //mando o filtro para useState
+      setComments(deleteComment)
+    }catch(err){
+      console.log(err)
     }
   }
 
@@ -115,6 +145,15 @@ export default function Task({ item, allComments }: TaskProps) {
 
             {comments.map((item) => (
               <article key={item.id} className={styles.comment}>
+                <div className={styles.headComment}>
+                  <label className={styles.commentsLabel}>{item.name}</label>
+                  {/* se o usuário estiver deslogado, o botão de excluir não aparece */}
+                {item.user === session?.user?.email && (
+                    <button className={styles.buttonTrash}>
+                    <FaTrash size={18} color="#EA3140" onClick={ () => handleDeleteComment(item.id)}/>
+                  </button>
+                )}
+                </div>
                 <p>{item.comment}</p>
               </article>
             ))}
